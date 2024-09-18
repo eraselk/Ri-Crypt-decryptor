@@ -38,8 +38,7 @@ for file in $@; do
             start_decryptor
         done
     fi
-    
-   exit
+
     chmod +x temp.sh
     ./temp.sh >./output/$file.dec.sh
     rm -f temp.sh
