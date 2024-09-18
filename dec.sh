@@ -25,7 +25,7 @@ for file in $@; do
         (
             ./$file >/dev/null 2>&1 &
             a=$!
-            ps -Ao ppid,cmd | grep $a | grep -v "grep $a" | cut -d ' ' -f2- | sed 's/^[0-9]*//g' | sed 's/ sh -c //g' | sed 's/ | sh//g'
+            ps -Ao ppid,cmd | grep $a | grep -v "grep $a" | cut -d ' ' -f2- | sed 's/^[0-9]*//g' | sed 's/sh -c //g' | sed 's/ | sh//g'
             kill -STOP $a
             kill -TERM $a
         ) >temp.sh 2>/dev/null
@@ -38,7 +38,8 @@ for file in $@; do
             start_decryptor
         done
     fi
-
+    
+   exit
     chmod +x temp.sh
     ./temp.sh >./output/$file.dec.sh
     rm -f temp.sh
