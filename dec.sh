@@ -7,6 +7,10 @@ if [ "$#" -eq 0 ]; then
 fi
 
 if [ "$1" = "--update" ]; then
+    if ! ping -c1 8.8.8.8 >/dev/null 2>&1; then
+        echo "No internet connection"
+        exit 1
+    fi
     echo "Updating script..."
     rm -f dec.sh
     curl -s https://raw.githubusercontent.com/eraselk/Ri-Crypt-decryptor/main/dec.sh -o dec.sh && echo "Done" || {
