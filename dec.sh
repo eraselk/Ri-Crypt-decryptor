@@ -17,6 +17,7 @@ if [ "$1" = "--update" ]; then
         echo "Failed"
         exit 1
     }
+    exit 0
 fi
 
 echo "RCD (Ri-Crypt Decryptor) v$PROG_VER"
