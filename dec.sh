@@ -17,6 +17,7 @@ if [ "$1" = "--update" ]; then
         echo "Failed"
         exit 1
     }
+    chmod +x dec.sh
     exit 0
 fi
 
