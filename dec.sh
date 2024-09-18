@@ -6,6 +6,15 @@ if [ "$#" -eq 0 ]; then
     exit 1
 fi
 
+if [ "$1" = "--update" ]; then
+    echo "Updating script..."
+    rm -f dec.sh
+    curl -s https://raw.githubusercontent.com/eraselk/Ri-Crypt-decryptor/main/dec.sh -o dec.sh && echo "Done" || {
+        echo "Failed"
+        exit 1
+    }
+fi
+
 echo "RCD (Ri-Crypt Decryptor) v$PROG_VER"
 echo "by $PROG_AUTH"
 echo
