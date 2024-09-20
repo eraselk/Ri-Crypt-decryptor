@@ -34,7 +34,7 @@ for file in $@; do
     fi
 
     name=$(basename $file)
-    if echo "$file" | grep -q -e '/sdcard' -e '/storage/emulated/0'; then
+    if echo "$file" | grep -q -e '/sdcard' -e '/storage/emulated/0' || [ ! -f "$name" ]; then
         cp -f $file .
         external=1
     fi
