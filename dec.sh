@@ -33,12 +33,19 @@ for file in $@; do
         exit 1
     fi
 
+    name=$(basename $file)
+    if echo "$file" | grep -q -e '/sdcard' -e '/storage/emulated/0'; then
+        cp -f $file .
+        external=1
+    fi
+    [ -x "$name" ] || chmod +x $name
+
     echo
-    echo "Decrypting $file..."
+    echo "Decrypting $file » output/$name.dec.sh..."
 
     start_decryptor() {
         (
-            ./$file >/dev/null 2>&1 &
+            ./$name >/dev/null 2>&1 &
             a=$!
             ps -Ao ppid,cmd | grep $a | grep -v "grep $a" | cut -d ' ' -f2- | sed 's/^[0-9]*//g' | sed 's/sh -c //g' | sed 's/ | sh//g'
             kill -STOP $a
@@ -48,15 +55,20 @@ for file in $@; do
 
     start_decryptor
 
-    if [ -z "$(cat temp.sh)" ]; then
-        until [ -n "$(cat temp.sh)" ]; do
+    if ! cat temp.sh | grep -q 'base64 -d'; then
+        until cat temp.sh | grep -q 'base64 -d'; do
             start_decryptor
         done
     fi
 
     chmod +x temp.sh
-    ./temp.sh >./output/$file.dec.sh
+    ./temp.sh >./output/$name.dec.sh
     rm -f temp.sh
+
+    if [ "$external" = "1" ]; then
+        rm -f $name
+    fi
+
     echo "Done"
 
 done
