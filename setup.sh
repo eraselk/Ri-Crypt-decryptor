@@ -1,11 +1,11 @@
 if ! ping -c1 8.8.8.8 >/dev/null 2>&1; then
-echo "No internet connection, aborted."
-exit 1
+    echo "No internet connection, aborted."
+    exit 1
 fi
 
 if [ "$(pwd)" != "$HOME" ]; then
-echo "Please run this script in $HOME directory"
-exit 1
+    echo "Please run this script in $HOME directory"
+    exit 1
 fi
 
 echo "Installing RCD..."
