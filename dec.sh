@@ -24,7 +24,7 @@ fi
 echo "RCD (Ri-Crypt Decryptor) v$PROG_VER"
 echo "by $PROG_AUTH"
 echo
-echo "WARNING: make sure the binary encrypted with 'Ri-Crypt'"
+echo "WARNING: make sure the binary encrypted with Ri-Crypt"
 
 for file in $@; do
 
@@ -38,7 +38,12 @@ for file in $@; do
         cp -f $file .
         external=1
     fi
-    [ -x "$name" ] || chmod +x $name
+    chmod 777 $name
+
+    if ! strings $name | grep -qE 'sh-c|.rs'; then
+        echo "FATAL: $file is not an Ri-Crypt encrypted script"
+        exit 1
+    fi
 
     echo
     echo "Decrypting $file » output/$name.dec.sh..."
@@ -47,7 +52,7 @@ for file in $@; do
         (
             ./$name >/dev/null 2>&1 &
             a=$!
-            ps -Ao ppid,cmd | grep $a | grep -v "grep $a" | cut -d ' ' -f2- | sed 's/^[0-9]*//g' | sed 's/sh -c //g' | sed 's/ | sh//g'
+            ps -Ao ppid,cmd | grep $a | grep -v "grep $a" | cut -d ' ' -f2- | sed -e 's/^[0-9]*//g' -e 's/sh -c //g' -e 's/ | sh//g' -e 's/ | bash//g'
             kill -STOP $a
             kill -TERM $a
         ) >temp.sh 2>/dev/null
