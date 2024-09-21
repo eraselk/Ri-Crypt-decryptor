@@ -1,12 +1,14 @@
-PROG_VER='1.0'
+PROG_VER='1.1'
 PROG_AUTH='eraselk @ github'
 
-if [ "$#" -eq 0 ]; then
-    echo "ERROR: no input file(s)"
+if [ -z "$1" ]; then
+    echo "ERROR: no input file(s) or option provided"
     exit 1
 fi
 
-if [ "$1" = "--update" ]; then
+case "$1" in
+
+"--update")
     if ! ping -c1 8.8.8.8 >/dev/null 2>&1; then
         echo "No internet connection"
         exit 1
@@ -19,61 +21,63 @@ if [ "$1" = "--update" ]; then
     }
     chmod +x dec.sh
     exit 0
-fi
-
-echo "RCD (Ri-Crypt Decryptor) v$PROG_VER"
-echo "by $PROG_AUTH"
-echo
-echo "WARNING: make sure the binary encrypted with Ri-Crypt"
-
-for file in $@; do
-
-    if ! [ -f "$file" ]; then
-        echo "file '$file' not found"
-        exit 1
-    fi
-
-    name=$(basename $file)
-    if echo "$file" | grep -q -e '/sdcard' -e '/storage/emulated/0' || [ ! -f "$name" ]; then
-        cp -f $file .
-        external=1
-    fi
-    chmod 777 $name
-
-    if ! strings $name | grep -qE 'sh-c|.rs'; then
-        echo "FATAL: $file is not an Ri-Crypt encrypted script"
-        exit 1
-    fi
-
+    ;;
+*)
+    echo "RCD (Ri-Crypt Decryptor) v$PROG_VER"
+    echo "by $PROG_AUTH"
     echo
-    echo "Decrypting $file » output/$name.dec.sh..."
+    echo "WARNING: make sure the binary encrypted with Ri-Crypt"
 
-    start_decryptor() {
-        (
-            ./$name >/dev/null 2>&1 &
-            a=$!
-            ps -Ao ppid,cmd | grep $a | grep -v "grep $a" | cut -d ' ' -f2- | sed -e 's/^[0-9]*//g' -e 's/sh -c //g' -e 's/ | sh//g' -e 's/ | bash//g'
-            kill -STOP $a
-            kill -TERM $a
-        ) >temp.sh 2>/dev/null
-    }
+    for file in $@; do
 
-    start_decryptor
+        if ! [ -f "$file" ]; then
+            echo "file '$file' not found"
+            exit 1
+        fi
 
-    if ! cat temp.sh | grep -q 'base64 -d'; then
-        until cat temp.sh | grep -q 'base64 -d'; do
-            start_decryptor
-        done
-    fi
+        name=$(basename $file)
+        if echo "$file" | grep -q -e '/sdcard' -e '/storage/emulated/0' || [ ! -f "$name" ]; then
+            cp -f $file .
+            external=1
+        fi
+        chmod 777 $name
 
-    chmod +x temp.sh
-    ./temp.sh >./output/$name.dec.sh
-    rm -f temp.sh
+        if ! strings $name | grep -qE 'sh-c|.rs'; then
+            echo "FATAL: $file is not an Ri-Crypt encrypted script"
+            exit 1
+        fi
 
-    if [ "$external" = "1" ]; then
-        rm -f $name
-    fi
+        echo
+        echo "Decrypting $file » output/$name.dec.sh..."
 
-    echo "Done"
+        start_decryptor() {
+            (
+                ./$name >/dev/null 2>&1 &
+                a=$!
+                ps -Ao ppid,cmd | grep $a | grep -v "grep $a" | cut -d ' ' -f2- | sed -e 's/^[0-9]*//g' -e 's/sh -c //g' -e 's/ | sh//g' -e 's/ | bash//g'
+                kill -STOP $a
+                kill -TERM $a
+            ) >temp.sh 2>/dev/null
+        }
 
-done
+        start_decryptor
+
+        if ! cat temp.sh | grep -q 'base64 -d'; then
+            until cat temp.sh | grep -q 'base64 -d'; do
+                start_decryptor
+            done
+        fi
+
+        chmod +x temp.sh
+        ./temp.sh >./output/$name.dec.sh
+        rm -f temp.sh
+
+        if [ "$external" = "1" ]; then
+            rm -f $name
+        fi
+
+        echo "Done"
+
+    done
+    ;;
+esac

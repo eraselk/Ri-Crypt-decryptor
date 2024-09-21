@@ -8,15 +8,25 @@ if [ "$(pwd)" != "$HOME" ]; then
     exit 1
 fi
 
+return=true
+
 echo "Installing RCD..."
 
-if [ -d "RCD" ]; then rm -rf RCD; fi
+if [ -d "RCD" ]; then
+    rm -rf RCD
+fi
 
-mkdir RCD
+mkdir -p RCD/output
 curl -s https://raw.githubusercontent.com/eraselk/Ri-Crypt-decryptor/main/dec.sh -o RCD/dec.sh
-mkdir RCD/output
 chmod +x RCD/dec.sh
 
 echo "Done"
+
+if ! hash strings >/dev/null 2>&1; then
+    echo
+    echo "strings not installed, installing strings..."
+    pkg install strings -y >/dev/null 2>&1 && echo "Done" || echo "Failed" && return=false
+fi
+
 rm -f setup.sh
-true
+$return
